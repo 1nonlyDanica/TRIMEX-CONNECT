@@ -25,13 +25,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // MOBILE BURGER MENU
     // ========================================
 
-    const menuButton = document.querySelector(
-        "#menuButton, .menu-button, .hamburger, .burger"
-    );
+    // These IDs match the ones in index.html.
+    const menuButton = document.getElementById("menuButton");
+    const navLinks = document.getElementById("navigation");
 
-    const navLinks = document.querySelector(
-        "#navLinks, #navigation, .navbar .navigation, .nav-links"
-    );
+    function closeDropdowns(except = null) {
+        document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
+            if (dropdown === except) return;
+
+            dropdown.classList.remove("open");
+
+            const toggle = dropdown.querySelector(".nav-dropdown-toggle");
+
+            if (toggle) {
+                toggle.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
 
     function closeMobileMenu() {
         if (navLinks) {
@@ -43,25 +53,13 @@ document.addEventListener("DOMContentLoaded", () => {
             menuButton.setAttribute("aria-expanded", "false");
         }
 
-        document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
-            dropdown.classList.remove("open");
-
-            const toggle = dropdown.querySelector(".nav-dropdown-toggle");
-
-            if (toggle) {
-                toggle.setAttribute("aria-expanded", "false");
-            }
-        });
+        closeDropdowns();
     }
 
     if (menuButton && navLinks) {
-
-        menuButton.setAttribute("aria-controls", navLinks.id || "navLinks");
+        menuButton.setAttribute("type", "button");
+        menuButton.setAttribute("aria-controls", "navigation");
         menuButton.setAttribute("aria-expanded", "false");
-
-        if (menuButton.tagName === "BUTTON") {
-            menuButton.setAttribute("type", "button");
-        }
 
         menuButton.addEventListener("click", event => {
             event.preventDefault();
@@ -78,18 +76,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Close the menu when a page link is selected.
+        // Close after choosing a navigation link.
         navLinks.querySelectorAll("a").forEach(link => {
             link.addEventListener("click", () => {
-                if (link.classList.contains("nav-dropdown-toggle")) {
-                    return;
-                }
-
                 closeMobileMenu();
             });
         });
 
-        // Close when tapping outside the menu.
+        // Close when tapping outside the navbar menu.
         document.addEventListener("click", event => {
             if (
                 !navLinks.contains(event.target) &&
@@ -99,19 +93,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Close when Escape is pressed.
+        // Close with Escape.
         document.addEventListener("keydown", event => {
             if (event.key === "Escape") {
                 closeMobileMenu();
             }
         });
 
-        // Reset the menu when returning to desktop width.
+        // Close when returning to desktop layout.
         window.addEventListener("resize", () => {
             if (window.innerWidth > 900) {
                 closeMobileMenu();
             }
         }, { passive: true });
+
+    } else {
+        console.error(
+            "Trimex Connect: Mobile navigation elements not found.",
+            {
+                menuButtonFound: Boolean(menuButton),
+                navigationFound: Boolean(navLinks)
+            }
+        );
     }
 
 
@@ -119,31 +122,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // CCS-MS DROPDOWN
     // ========================================
 
-    function closeDropdowns(except = null) {
-        document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
-            if (dropdown === except) return;
-
-            dropdown.classList.remove("open");
-
-            const toggle = dropdown.querySelector(".nav-dropdown-toggle");
-
-            if (toggle) {
-                toggle.setAttribute("aria-expanded", "false");
-            }
-        });
-    }
-
     document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
-
         const toggle = dropdown.querySelector(".nav-dropdown-toggle");
 
         if (!toggle) return;
 
+        toggle.setAttribute("aria-expanded", "false");
+
         if (toggle.tagName === "BUTTON") {
             toggle.setAttribute("type", "button");
         }
-
-        toggle.setAttribute("aria-expanded", "false");
 
         toggle.addEventListener("click", event => {
             event.preventDefault();
@@ -169,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(
         ".navigation a, .nav-links a, .footer-links a"
     ).forEach(link => {
-
         const href = link.getAttribute("href");
 
         if (
@@ -200,7 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     if ("IntersectionObserver" in window && revealItems.length) {
-
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -304,6 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     enrollmentOptions.forEach(card => {
         card.setAttribute("role", "button");
+
         card.setAttribute(
             "aria-pressed",
             card.classList.contains("selected") ? "true" : "false"
