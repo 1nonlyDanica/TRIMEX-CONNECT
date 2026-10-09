@@ -1,104 +1,147 @@
+
 /* =====================================================
-   NAVBAR SCROLL EFFECT
+   TRIMEX CONNECT — MAIN JAVASCRIPT
 ===================================================== */
 
-const navbar = document.getElementById("navbar");
+document.addEventListener("DOMContentLoaded", () => {
 
-window.addEventListener("scroll", function () {
+    // ========================================
+    // NAVBAR SCROLL EFFECT
+    // ========================================
 
-    if (!navbar) return;
+    const navbar = document.querySelector(".navbar");
 
-    if (window.scrollY > 20) {
-
-        navbar.classList.add("scrolled");
-
-    } else {
-
-        navbar.classList.remove("scrolled");
-
+    function updateNavbar() {
+        if (navbar) {
+            navbar.classList.toggle("scrolled", window.scrollY > 20);
+        }
     }
 
-});
-/* =========================================
-   CCS-MS DROPDOWN
-========================================= */
-
-const navDropdown = document.querySelector(".nav-dropdown");
-const navDropdownToggle = document.querySelector(".nav-dropdown-toggle");
-
-if (navDropdown && navDropdownToggle) {
-
-    navDropdownToggle.addEventListener("click", (event) => {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        navDropdown.classList.toggle("open");
-
-    });
+    updateNavbar();
+    window.addEventListener("scroll", updateNavbar, { passive: true });
 
 
-    /* Close when clicking somewhere else */
+    // ========================================
+    // MOBILE BURGER MENU
+    // ========================================
 
-    document.addEventListener("click", (event) => {
+    const menuButton = document.querySelector(
+        "#menuButton, .menu-button, .hamburger, .burger"
+    );
 
-        if (!navDropdown.contains(event.target)) {
-            navDropdown.classList.remove("open");
+    const navLinks = document.querySelector(
+        "#navLinks, #navigation, .navbar .navigation, .nav-links"
+    );
+
+    function closeMobileMenu() {
+        if (navLinks) {
+            navLinks.classList.remove("open");
         }
 
-    });
+        if (menuButton) {
+            menuButton.classList.remove("open");
+            menuButton.setAttribute("aria-expanded", "false");
+        }
 
+        document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
+            dropdown.classList.remove("open");
 
-    /* Close after selecting a service */
+            const toggle = dropdown.querySelector(".nav-dropdown-toggle");
 
-    const dropdownLinks =
-        navDropdown.querySelectorAll(".nav-dropdown-menu a");
+            if (toggle) {
+                toggle.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
 
-    dropdownLinks.forEach(link => {
+    if (menuButton && navLinks) {
 
-        link.addEventListener("click", () => {
+        menuButton.setAttribute("aria-controls", navLinks.id || "navLinks");
+        menuButton.setAttribute("aria-expanded", "false");
 
-            navDropdown.classList.remove("open");
+        if (menuButton.tagName === "BUTTON") {
+            menuButton.setAttribute("type", "button");
+        }
 
+        menuButton.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isOpen = !navLinks.classList.contains("open");
+
+            navLinks.classList.toggle("open", isOpen);
+            menuButton.classList.toggle("open", isOpen);
+            menuButton.setAttribute("aria-expanded", String(isOpen));
+
+            if (!isOpen) {
+                closeDropdowns();
+            }
         });
 
-    });
+        // Close the menu when a page link is selected.
+        navLinks.querySelectorAll("a").forEach(link => {
+            link.addEventListener("click", () => {
+                if (link.classList.contains("nav-dropdown-toggle")) {
+                    return;
+                }
+
+                closeMobileMenu();
+            });
+        });
+
+        // Close when tapping outside the menu.
+        document.addEventListener("click", event => {
+            if (
+                !navLinks.contains(event.target) &&
+                !menuButton.contains(event.target)
+            ) {
+                closeMobileMenu();
+            }
+        });
+
+        // Close when Escape is pressed.
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                closeMobileMenu();
+            }
+        });
+
+        // Reset the menu when returning to desktop width.
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 900) {
+                closeMobileMenu();
+            }
+        }, { passive: true });
+    }
 
 
-    /* Close with ESC */
+    // ========================================
+    // CCS-MS DROPDOWN
+    // ========================================
 
-    document.addEventListener("keydown", (event) => {
+    function closeDropdowns(except = null) {
+        document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
+            if (dropdown === except) return;
 
-        if (event.key === "Escape") {
-            navDropdown.classList.remove("open");
-        }
+            dropdown.classList.remove("open");
 
-    });
+            const toggle = dropdown.querySelector(".nav-dropdown-toggle");
 
-}
-// ========================================
-// MOBILE NAVIGATION
-// ========================================
+            if (toggle) {
+                toggle.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
 
-const menuButton = document.getElementById("menuButton");
-const navLinks = document.getElementById("navLinks");
+    document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
 
-if (menuButton && navLinks) {
-    // Open and close the main navigation
-    menuButton.addEventListener("click", () => {
-        const isOpen = navLinks.classList.toggle("open");
-
-        menuButton.classList.toggle("open", isOpen);
-        menuButton.setAttribute("aria-expanded", String(isOpen));
-    });
-
-    // CCS-MS dropdown
-    const dropdowns = navLinks.querySelectorAll(".nav-dropdown");
-
-    dropdowns.forEach(dropdown => {
         const toggle = dropdown.querySelector(".nav-dropdown-toggle");
 
         if (!toggle) return;
+
+        if (toggle.tagName === "BUTTON") {
+            toggle.setAttribute("type", "button");
+        }
 
         toggle.setAttribute("aria-expanded", "false");
 
@@ -106,187 +149,174 @@ if (menuButton && navLinks) {
             event.preventDefault();
             event.stopPropagation();
 
-            const willOpen = !dropdown.classList.contains("open");
+            const isOpen = !dropdown.classList.contains("open");
 
-            // Close other dropdowns first
-            dropdowns.forEach(otherDropdown => {
-                otherDropdown.classList.remove("open");
+            closeDropdowns(dropdown);
 
-                const otherToggle = otherDropdown.querySelector(
-                    ".nav-dropdown-toggle"
-                );
-
-                if (otherToggle) {
-                    otherToggle.setAttribute("aria-expanded", "false");
-                }
-            });
-
-            // Toggle the selected dropdown
-            if (willOpen) {
-                dropdown.classList.add("open");
-                toggle.setAttribute("aria-expanded", "true");
-            }
+            dropdown.classList.toggle("open", isOpen);
+            toggle.setAttribute("aria-expanded", String(isOpen));
         });
     });
 
-    // Close navigation after choosing a page or service
-    navLinks.querySelectorAll("a").forEach(link => {
-        link.addEventListener("click", () => {
-            navLinks.classList.remove("open");
-            menuButton.classList.remove("open");
-            menuButton.setAttribute("aria-expanded", "false");
 
-            dropdowns.forEach(dropdown => {
-                dropdown.classList.remove("open");
+    // ========================================
+    // ACTIVE NAVIGATION LINK
+    // ========================================
 
-                const toggle = dropdown.querySelector(
-                    ".nav-dropdown-toggle"
-                );
+    const currentPage =
+        window.location.pathname.split("/").pop() || "index.html";
 
-                if (toggle) {
-                    toggle.setAttribute("aria-expanded", "false");
-                }
-            });
-        });
-    });
+    document.querySelectorAll(
+        ".navigation a, .nav-links a, .footer-links a"
+    ).forEach(link => {
 
-    // Close the menu when the user taps outside it
-    document.addEventListener("click", event => {
+        const href = link.getAttribute("href");
+
         if (
-            !navLinks.contains(event.target) &&
-            !menuButton.contains(event.target)
+            !href ||
+            href.startsWith("#") ||
+            href.startsWith("http") ||
+            href.startsWith("mailto:") ||
+            link.classList.contains("nav-dropdown-toggle")
         ) {
-            navLinks.classList.remove("open");
-            menuButton.classList.remove("open");
-            menuButton.setAttribute("aria-expanded", "false");
+            return;
+        }
 
-            dropdowns.forEach(dropdown => {
-                dropdown.classList.remove("open");
+        const linkPage = href.split("/").pop().split("?")[0];
 
-                const toggle = dropdown.querySelector(
-                    ".nav-dropdown-toggle"
-                );
-
-                if (toggle) {
-                    toggle.setAttribute("aria-expanded", "false");
-                }
-            });
+        if (linkPage === currentPage) {
+            link.classList.add("active");
         }
     });
-}
 
 
+    // ========================================
+    // REVEAL CARDS ON SCROLL
+    // ========================================
 
-/* =====================================================
-   CURRENT PAGE NAVIGATION
-===================================================== */
+    const revealItems = document.querySelectorAll(
+        ".quick-card, .service-card, .gazette-card, " +
+        ".enrollment-panel, .service-directory-card, .announcement-card"
+    );
 
-const currentPage =
-    window.location.pathname.split("/").pop();
+    if ("IntersectionObserver" in window && revealItems.length) {
 
-const navigationLinks =
-    document.querySelectorAll(".navigation a");
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
 
-navigationLinks.forEach(function (link) {
+        revealItems.forEach(item => observer.observe(item));
 
-    const linkPage =
-        link.getAttribute("href");
-
-    if (
-        linkPage === currentPage &&
-        !link.classList.contains("enroll-button")
-    ) {
-
-        link.classList.add("active");
-
+    } else {
+        revealItems.forEach(item => item.classList.add("visible"));
     }
 
-});
 
-/* =========================================
-   GAZETTE VIDEO FEATURE
-========================================= */
+    // ========================================
+    // ENROLLMENT OPTION SELECTION
+    // ========================================
 
-const gazetteButtons = document.querySelectorAll(".gazette-preview-btn");
+    const enrollmentOptions =
+        document.querySelectorAll(".enrollment-option");
 
-const gazetteVideo = document.getElementById("gazetteVideo");
-const videoOverlay = document.getElementById("videoOverlay");
-const videoPlay = document.getElementById("videoPlay");
+    const enrollmentNextStep =
+        document.getElementById("enrollmentNextStep");
 
-const gazetteVideoTitle = document.getElementById("gazetteVideoTitle");
-const gazetteVideoDescription = document.getElementById("gazetteVideoDescription");
+    const selectedTitle =
+        document.getElementById("selectedTitle");
 
-const gazetteFeature = document.getElementById("gazetteFeature");
+    const selectedMessage =
+        document.getElementById("selectedMessage");
 
+    const nextStepAction =
+        document.getElementById("nextStepAction");
 
-/* PLAY BUTTON */
+    const enrollmentMessages = {
+        new: {
+            title: "New Student selected.",
+            message:
+                "Review the requirements and enrollment instructions for new students before starting your application.",
+            action: "NEXT: REVIEW NEW STUDENT REQUIREMENTS"
+        },
 
-if (gazetteVideo && videoOverlay && videoPlay) {
+        current: {
+            title: "Current / Old Student selected.",
+            message:
+                "Check the enrollment instructions for returning students and prepare the information needed for enrollment.",
+            action: "NEXT: REVIEW RETURNING STUDENT REQUIREMENTS"
+        },
 
-    videoPlay.addEventListener("click", () => {
-        gazetteVideo.play();
-        videoOverlay.classList.add("hidden");
-    });
-
-    gazetteVideo.addEventListener("play", () => {
-        videoOverlay.classList.add("hidden");
-    });
-
-    gazetteVideo.addEventListener("pause", () => {
-        if (gazetteVideo.currentTime === 0) {
-            videoOverlay.classList.remove("hidden");
+        transferee: {
+            title: "Transferee selected.",
+            message:
+                "Review the requirements and enrollment instructions specifically provided for transferees.",
+            action: "NEXT: REVIEW TRANSFEREE REQUIREMENTS"
         }
-    });
+    };
 
-    gazetteVideo.addEventListener("ended", () => {
-        videoOverlay.classList.remove("hidden");
-    });
-}
+    function selectEnrollment(card) {
+        const selection = enrollmentMessages[card.dataset.type];
 
+        if (!selection) return;
 
-/* VOLUME / PUBLICATION SELECTION */
+        enrollmentOptions.forEach(option => {
+            option.classList.remove("selected");
 
-gazetteButtons.forEach(button => {
+            const button = option.querySelector(".enrollment-btn");
 
-    button.addEventListener("click", () => {
-
-        const selectedGazette = button.dataset.gazette;
-
-        if (selectedGazette === "vol1") {
-
-            if (gazetteVideoTitle) {
-                gazetteVideoTitle.textContent =
-                    "CCS Gazette — Volume 01";
+            if (button) {
+                button.textContent = "SELECT THIS";
             }
 
-            if (gazetteVideoDescription) {
-                gazetteVideoDescription.textContent =
-                    "Explore the stories, activities, announcements, and student moments featured in CCS Gazette Volume 01.";
-            }
+            option.setAttribute("aria-pressed", "false");
+        });
 
+        card.classList.add("selected");
+        card.setAttribute("aria-pressed", "true");
+
+        const selectedButton = card.querySelector(".enrollment-btn");
+
+        if (selectedButton) {
+            selectedButton.textContent = "SELECTED";
         }
 
-        if (selectedGazette === "vol2") {
-
-            if (gazetteVideoTitle) {
-                gazetteVideoTitle.textContent =
-                    "CCS Gazette — Volume 02";
-            }
-
-            if (gazetteVideoDescription) {
-                gazetteVideoDescription.textContent =
-                    "Explore the latest CCS stories, activities, announcements, and student moments featured in Gazette Volume 02.";
-            }
-
+        if (selectedTitle) {
+            selectedTitle.textContent = selection.title;
         }
 
-        if (gazetteFeature) {
-            gazetteFeature.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
+        if (selectedMessage) {
+            selectedMessage.textContent = selection.message;
         }
 
+        if (nextStepAction) {
+            nextStepAction.textContent = selection.action;
+        }
+
+        if (enrollmentNextStep) {
+            enrollmentNextStep.classList.add("active");
+        }
+    }
+
+    enrollmentOptions.forEach(card => {
+        card.setAttribute("role", "button");
+        card.setAttribute(
+            "aria-pressed",
+            card.classList.contains("selected") ? "true" : "false"
+        );
+
+        card.addEventListener("click", () => selectEnrollment(card));
+
+        card.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                selectEnrollment(card);
+            }
+        });
     });
 
 });
