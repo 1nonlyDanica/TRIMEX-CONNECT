@@ -1,10 +1,4 @@
 /* =====================================================
-   TRIMEX CONNECT
-   JAVASCRIPT
-===================================================== */
-
-
-/* =====================================================
    NAVBAR SCROLL EFFECT
 ===================================================== */
 
@@ -82,99 +76,104 @@ if (navDropdown && navDropdownToggle) {
     });
 
 }
-
-/* =====================================================
-   MOBILE MENU
-===================================================== */
+// ========================================
+// MOBILE NAVIGATION
+// ========================================
 
 const menuButton = document.getElementById("menuButton");
-const navigation = document.getElementById("navigation");
+const navLinks = document.getElementById("navLinks");
 
-if (menuButton && navigation) {
+if (menuButton && navLinks) {
+    // Open and close the main navigation
+    menuButton.addEventListener("click", () => {
+        const isOpen = navLinks.classList.toggle("open");
 
-    menuButton.addEventListener("click", function () {
-
-        navigation.classList.toggle("open");
-
+        menuButton.classList.toggle("open", isOpen);
+        menuButton.setAttribute("aria-expanded", String(isOpen));
     });
 
+    // CCS-MS dropdown
+    const dropdowns = navLinks.querySelectorAll(".nav-dropdown");
 
-    /*
-       Close mobile menu when
-       a navigation link is clicked
-    */
+    dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector(".nav-dropdown-toggle");
 
-    const navItems =
-        navigation.querySelectorAll("a");
+        if (!toggle) return;
 
-    navItems.forEach(function (item) {
+        toggle.setAttribute("aria-expanded", "false");
 
-        item.addEventListener("click", function () {
+        toggle.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
 
-            navigation.classList.remove("open");
+            const willOpen = !dropdown.classList.contains("open");
 
-        });
+            // Close other dropdowns first
+            dropdowns.forEach(otherDropdown => {
+                otherDropdown.classList.remove("open");
 
-    });
+                const otherToggle = otherDropdown.querySelector(
+                    ".nav-dropdown-toggle"
+                );
 
-}
-
-
-
-/* =====================================================
-   SIMPLE SCROLL REVEAL
-===================================================== */
-
-const revealElements =
-    document.querySelectorAll(
-        ".quick-card, .service-card, .gazette-card, .enrollment-panel"
-    );
-
-
-const revealObserver =
-    new IntersectionObserver(
-
-        function (entries, observer) {
-
-            entries.forEach(function (entry) {
-
-                if (entry.isIntersecting) {
-
-                    entry.target.style.opacity = "1";
-
-                    entry.target.style.transform =
-                        "translateY(0)";
-
-                    observer.unobserve(
-                        entry.target
-                    );
-
+                if (otherToggle) {
+                    otherToggle.setAttribute("aria-expanded", "false");
                 }
-
             });
 
-        },
+            // Toggle the selected dropdown
+            if (willOpen) {
+                dropdown.classList.add("open");
+                toggle.setAttribute("aria-expanded", "true");
+            }
+        });
+    });
 
-        {
-            threshold: 0.1
+    // Close navigation after choosing a page or service
+    navLinks.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => {
+            navLinks.classList.remove("open");
+            menuButton.classList.remove("open");
+            menuButton.setAttribute("aria-expanded", "false");
+
+            dropdowns.forEach(dropdown => {
+                dropdown.classList.remove("open");
+
+                const toggle = dropdown.querySelector(
+                    ".nav-dropdown-toggle"
+                );
+
+                if (toggle) {
+                    toggle.setAttribute("aria-expanded", "false");
+                }
+            });
+        });
+    });
+
+    // Close the menu when the user taps outside it
+    document.addEventListener("click", event => {
+        if (
+            !navLinks.contains(event.target) &&
+            !menuButton.contains(event.target)
+        ) {
+            navLinks.classList.remove("open");
+            menuButton.classList.remove("open");
+            menuButton.setAttribute("aria-expanded", "false");
+
+            dropdowns.forEach(dropdown => {
+                dropdown.classList.remove("open");
+
+                const toggle = dropdown.querySelector(
+                    ".nav-dropdown-toggle"
+                );
+
+                if (toggle) {
+                    toggle.setAttribute("aria-expanded", "false");
+                }
+            });
         }
-
-    );
-
-
-revealElements.forEach(function (element) {
-
-    element.style.opacity = "0";
-
-    element.style.transform =
-        "translateY(20px)";
-
-    element.style.transition =
-        "opacity 0.6s ease, transform 0.6s ease";
-
-    revealObserver.observe(element);
-
-});
+    });
+}
 
 
 
