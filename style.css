@@ -3966,115 +3966,63 @@ button {
     .navbar .navigation,
     .navbar .nav-dropdown-menu { transition: none !important; }
 }
-/* FIX: Make the mobile menu button tappable */
-@media (max-width: 900px) {
-    header.navbar#navbar {
-        position: fixed;
-        isolation: isolate;
-        z-index: 99999;
-        pointer-events: auto;
-    }
-
-    #menuButton.menu-button {
-        position: relative;
-        z-index: 100001;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        width: 48px;
-        height: 48px;
-        flex-shrink: 0;
-        cursor: pointer;
-        pointer-events: auto !important;
-        touch-action: manipulation;
-    }
-
-    #menuButton.menu-button span {
-        pointer-events: none;
-    }
-
-    #navigation.navigation {
-        z-index: 100000;
-        pointer-events: auto;
-    }
-
-    #navigation.navigation:not(.open) {
-        pointer-events: none;
-    }
-
-    #navigation.navigation.open {
-        pointer-events: auto;
-    }
-}
 
 /* =====================================================
-   HOMEPAGE HERO IMAGE FIX
-   Keeps inserted images/logos from taking over the hero.
-===================================================== */
-.hero {
+   FINAL SAFETY FIX — LOGO IMAGE AND HOMEPAGE HERO
+   ===================================================== */
+.logo-image {
+    display: block;
+    width: 38px !important;
+    height: 38px !important;
+    max-width: 38px !important;
+    max-height: 38px !important;
+    object-fit: contain;
+    flex: 0 0 38px;
+}
+
+.navbar .logo,
+.footer .logo {
+    display: flex;
+    align-items: center;
+    gap: 11px;
     min-width: 0;
 }
 
-.hero > *,
+/* The homepage hero uses text on the left and a tech card on the right.
+   Prevent unrelated images from expanding the hero column. */
+.hero {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
 .hero-content,
 .hero-visual {
     min-width: 0;
 }
 
-/* Images placed in the homepage hero should stay inside their column. */
-.hero img,
-.hero-content img,
-.hero-visual img,
-.hero-image {
-    display: block;
-    width: 100%;
+.hero-content img {
     max-width: 100%;
     height: auto;
-    max-height: 420px;
-    object-fit: contain;
-    object-position: center;
-}
-
-/* If the CCS logo is a standalone hero image, keep it from pushing
-   the heading and buttons out of position. */
-.hero > img {
-    max-width: 100%;
-    max-height: 420px;
-    justify-self: center;
-    align-self: center;
-}
-
-/* Keep the navigation logo a predictable size on desktop and mobile. */
-.logo-image {
-    display: block;
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
-    object-fit: contain;
 }
 
 @media (max-width: 900px) {
     .hero {
         grid-template-columns: minmax(0, 1fr);
-        gap: 28px;
     }
 
-    .hero img,
-    .hero-content img,
-    .hero-visual img,
-    .hero-image,
-    .hero > img {
-        max-height: 340px;
+    .hero-visual {
+        width: 100%;
+        max-width: 520px;
+        margin-inline: auto;
     }
 }
 
 @media (max-width: 600px) {
-    .hero img,
-    .hero-content img,
-    .hero-visual img,
-    .hero-image,
-    .hero > img {
-        max-height: 280px;
+    .navbar .logo-image,
+    .footer .logo-image {
+        width: 36px !important;
+        height: 36px !important;
+        max-width: 36px !important;
+        max-height: 36px !important;
+        flex-basis: 36px;
     }
 }
-
